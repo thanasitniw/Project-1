@@ -9,8 +9,7 @@ from openpyxl import load_workbook
 
 PRIVATE_ASN_START = 64512
 PRIVATE_ASN_END = 65534
-TEXT_FILE_SUFFIX = ".txt"
-EXCEL_FILE_SUFFIX = ".xlsx"
+MASTER_WORKBOOK_NAME = "ASN-Assigment.master.xlsx"
 
 
 def clean_text(value: Any) -> str:
@@ -42,6 +41,7 @@ def parse_range(value: Any) -> tuple[int, int] | None:
 class AsnRepository:
     def __init__(self, source_dir: str | None = None) -> None:
         self.source_dir = Path(source_dir or os.getenv("ASN_SOURCE_DIR", "/asn-source"))
+        self.master_workbook_name = os.getenv("ASN_MASTER_FILE", MASTER_WORKBOOK_NAME)
         self._cache_signature: tuple[tuple[str, int, int], ...] | None = None
         self._cache_data: dict[str, Any] | None = None
 
@@ -68,11 +68,10 @@ class AsnRepository:
     def _collect_source_files(self) -> list[Path]:
         if not self.source_dir.exists():
             return []
-        return [
-            path
-            for path in self.source_dir.iterdir()
-            if path.is_file() and not path.name.startswith(".")
-        ]
+        master_path = self.source_dir / self.master_workbook_name
+        if master_path.exists() and master_path.is_file():
+            return [master_path]
+        return []
 
     def _build_dataset(self, source_files: list[Path]) -> dict[str, Any]:
         assignments: dict[int, dict[str, Any]] = {}
@@ -82,12 +81,14 @@ class AsnRepository:
 
         for path in source_files:
             try:
-                if path.suffix.lower() == EXCEL_FILE_SUFFIX:
-                    self._load_excel(path, assignments, allocation_blocks)
-                elif path.suffix.lower() == TEXT_FILE_SUFFIX:
-                    route_snapshots.append(self._load_route_snapshot(path))
+                self._load_excel(path, assignments, allocation_blocks)
             except Exception as exc:
                 warnings.append(f"{path.name}: {exc}")
+
+        if not source_files:
+            warnings.append(
+                f"Master workbook not found: {self.master_workbook_name} in {self.source_dir}"
+            )
 
         used_private = sorted(
             asn for asn in assignments if PRIVATE_ASN_START <= asn <= PRIVATE_ASN_END
@@ -144,17 +145,7 @@ class AsnRepository:
         allocation_blocks: dict[tuple[int, int, str], dict[str, Any]],
     ) -> None:
         workbook = load_workbook(path, read_only=True, data_only=True)
-
-        if path.name == "ASN-Assigment.master.xlsx":
-            self._parse_master_workbook(workbook, assignments, allocation_blocks, path.name)
-            return
-
-        if path.name == "BGP AS Number at Ex.True-IT.xlsx":
-            self._parse_external_workbook(workbook, assignments, path.name)
-            return
-
-        if path.name == "DTAC ACI Master-sheet-v5_update_20250901.xlsx":
-            self._parse_aci_workbook(workbook, assignments, path.name)
+        self._parse_master_workbook(workbook, assignments, allocation_blocks, path.name)
 
     def _parse_master_workbook(
         self,
@@ -222,41 +213,6 @@ class AsnRepository:
                     description=clean_text(row[1] if len(row) > 1 else None),
                     remark=clean_text(row[2] if len(row) > 2 else None),
                     domain="true-cn",
-                )
-
-    def _parse_external_workbook(
-        self, workbook: Any, assignments: dict[int, dict[str, Any]], source: str
-    ) -> None:
-        sheet = workbook[workbook.sheetnames[0]]
-        for row in sheet.iter_rows(min_row=2, values_only=True):
-            self._record_assignment(
-                assignments,
-                parse_asn(row[1] if len(row) > 1 else None),
-                source,
-                description=clean_text(row[2] if len(row) > 2 else None),
-                remark=clean_text(row[3] if len(row) > 3 else None),
-                site=clean_text(row[0] if len(row) > 0 else None),
-                domain="external-true-it",
-            )
-
-    def _parse_aci_workbook(
-        self, workbook: Any, assignments: dict[int, dict[str, Any]], source: str
-    ) -> None:
-        if "ASN" not in workbook.sheetnames:
-            return
-
-        sheet = workbook["ASN"]
-        for row in sheet.iter_rows(min_row=2, values_only=True):
-            for asn_index, zone_index in ((0, 1), (4, 5), (8, 9)):
-                zone = clean_text(row[zone_index] if len(row) > zone_index else None)
-                if not zone:
-                    continue
-                self._record_assignment(
-                    assignments,
-                    parse_asn(row[asn_index] if len(row) > asn_index else None),
-                    source,
-                    description=zone,
-                    domain=zone,
                 )
 
     def _record_assignment(
@@ -333,53 +289,6 @@ class AsnRepository:
                 }
             )
         return recommendations[:12]
-
-    def _load_route_snapshot(self, path: Path) -> dict[str, Any]:
-        lines: list[str] = []
-        with path.open("r", encoding="utf-8", errors="ignore") as handle:
-            for _, line in zip(range(120), handle):
-                lines.append(line.rstrip())
-
-        joined = "\n".join(lines)
-        local_as = None
-        router_id = None
-        total_routes = None
-        device_name = None
-        vendor = "Unknown"
-
-        nokia_match = re.search(r"BGP Router ID:(\S+)\s+AS:(\d+)", joined)
-        if nokia_match:
-            vendor = "Nokia"
-            router_id = nokia_match.group(1)
-            local_as = int(nokia_match.group(2))
-
-        huawei_router_match = re.search(r"BGP Local router ID is (\S+)", joined)
-        if huawei_router_match:
-            vendor = "Huawei"
-            router_id = huawei_router_match.group(1)
-
-        huawei_total_match = re.search(r"Total number of routes from all PE:\s*(\d+)", joined)
-        if huawei_total_match:
-            total_routes = int(huawei_total_match.group(1))
-
-        device_match = re.search(r"Device\s*:\s*(.+)", joined)
-        if device_match:
-            device_name = device_match.group(1).strip()
-        elif lines:
-            prompt_match = re.search(r"#\s*$", lines[0])
-            if prompt_match:
-                device_name = lines[0].split(":")[-1].replace("#", "").strip()
-
-        return {
-            "file_name": path.name,
-            "vendor": vendor,
-            "device_name": device_name or path.stem,
-            "router_id": router_id,
-            "local_as": local_as,
-            "total_routes": total_routes,
-            "size_mb": round(path.stat().st_size / (1024 * 1024), 2),
-        }
-
 
 def filter_assignments(assignments: list[dict[str, Any]], query: str, limit: int) -> list[dict[str, Any]]:
     normalized = query.strip().lower()

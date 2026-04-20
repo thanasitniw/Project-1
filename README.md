@@ -50,6 +50,10 @@ By default the backend reads ASN source files from:
 
 - `/Users/ta/Documents/ASN`
 
+The current app only reads:
+
+- `ASN-Assigment.master.xlsx`
+
 If you want a different folder on your Mac, override it when starting Docker:
 
 ```bash

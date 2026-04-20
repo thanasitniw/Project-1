@@ -70,7 +70,7 @@ function renderDuplicates(items) {
 
 function renderRouteSnapshots(items) {
   if (!items.length) {
-    routesList.innerHTML = "<li>No route snapshots found.</li>";
+    routesList.innerHTML = "<li>Route snapshots are disabled in master-only mode.</li>";
     return;
   }
 
@@ -143,7 +143,7 @@ async function loadStatus() {
 
     statusText.textContent = `Backend status: ${health.status}`;
     sourceDir.textContent = dashboard.source_dir;
-    sourceFiles.textContent = `${dashboard.source_files.length} files loaded: ${dashboard.source_files.join(", ")}`;
+    sourceFiles.textContent = `Master-only mode: ${dashboard.source_files.join(", ")}`;
     renderStats(dashboard.summary);
     renderRecommendations(dashboard.recommendations);
     renderDuplicates(dashboard.duplicate_asns);
