@@ -16,6 +16,25 @@ then ship the built image to a Linux server.
 - Dev orchestration: Docker Compose
 - Production packaging: single multi-stage Docker image
 
+## Run The App Quickly
+
+```bash
+./run-app.sh
+```
+
+Then open:
+
+- App: http://localhost:8000
+
+To stop it:
+
+```bash
+./stop-app.sh
+```
+
+This mode is the easiest one for Docker Desktop because it runs one app
+container with port `8000` published directly.
+
 ## Run In Development
 
 ```bash
@@ -29,12 +48,22 @@ By default the backend reads ASN source files from:
 If you want a different folder on your Mac, override it when starting Docker:
 
 ```bash
-HOST_ASN_DATA_DIR=/your/asn/folder docker compose up --build
+HOST_ASN_DATA_DIR=/your/asn/folder ./run-app.sh
 ```
 
 Then open:
 
-- Frontend: http://localhost:5173
+- App: http://localhost:8000
+
+For the separate frontend/backend development mode:
+
+```bash
+docker compose -f docker-compose.yml up --build
+```
+
+Then open:
+
+- Frontend dev: http://localhost:5173
 - Backend API: http://localhost:8000/api/health
 
 ## Build Production Image

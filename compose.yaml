@@ -1,0 +1,14 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: project-1-asn-app
+    environment:
+      ASN_SOURCE_DIR: /asn-source
+    ports:
+      - "8000:8000"
+    volumes:
+      - ${HOST_ASN_DATA_DIR:-/Users/ta/Documents/ASN}:/asn-source:ro
+    restart: unless-stopped
