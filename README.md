@@ -35,6 +35,11 @@ To stop it:
 This mode is the easiest one for Docker Desktop because it runs one app
 container with port `8000` published directly.
 
+The names you should look for in Docker Desktop are:
+
+- Image: `asn-web-app:latest`
+- Container: `asn-web-app`
+
 ## Run In Development
 
 ```bash

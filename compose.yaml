@@ -1,10 +1,13 @@
+name: asn-web
+
 services:
   app:
+    image: asn-web-app:latest
     build:
       context: .
       dockerfile: Dockerfile
       target: production
-    container_name: project-1-asn-app
+    container_name: asn-web-app
     environment:
       ASN_SOURCE_DIR: /asn-source
     ports:
