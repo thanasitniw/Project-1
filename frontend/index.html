@@ -3,34 +3,106 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Project 1</title>
+    <title>Private ASN Assignment</title>
     <script type="module" src="/src/main.js"></script>
   </head>
   <body>
     <div class="page-shell">
       <header class="hero">
-        <p class="eyebrow">Docker-first Starter</p>
-        <h1>Build once on your Mac, run on Linux for real.</h1>
+        <p class="eyebrow">IPCORE Network</p>
+        <h1>Private AS Number assignment workspace.</h1>
         <p class="hero-copy">
-          This starter keeps Python, Node.js, and frontend tooling inside Docker
-          so each project stays isolated.
+          Summarize ASN master data, inspect duplicate usage, and suggest the
+          next available private ASN from your source files.
         </p>
       </header>
 
-      <main class="content-grid">
-        <section class="card">
-          <h2>Frontend</h2>
-          <p>Vanilla HTML, CSS, and JavaScript powered by Vite.</p>
+      <main class="dashboard">
+        <section class="meta-row">
+          <article class="card card-wide">
+            <h2>Data Source</h2>
+            <p class="muted" id="source-dir">Loading source directory...</p>
+            <p class="caption" id="source-files"></p>
+          </article>
+          <article class="card card-status">
+            <h2>API Status</h2>
+            <p id="status-text">Checking backend connection...</p>
+          </article>
+        </section>
+
+        <section class="stats-grid" id="stats-grid"></section>
+
+        <section class="card search-panel">
+          <div class="section-heading">
+            <div>
+              <h2>ASN Search</h2>
+              <p class="caption">Search by ASN, device, source file, domain, or description.</p>
+            </div>
+            <label class="search-box">
+              <span>Search</span>
+              <input id="search-input" type="search" placeholder="64549, ACI, TT-12..." />
+            </label>
+          </div>
+          <div class="table-shell">
+            <table>
+              <thead>
+                <tr>
+                  <th>ASN</th>
+                  <th>Description</th>
+                  <th>Domain / Tenant</th>
+                  <th>Sources</th>
+                </tr>
+              </thead>
+              <tbody id="results-body">
+                <tr>
+                  <td colspan="4">Loading ASN inventory...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="three-up">
+          <article class="card">
+            <h2>Suggested Next ASN</h2>
+            <ul class="pill-list" id="recommendations-list">
+              <li>Loading recommendations...</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h2>Duplicate Watch</h2>
+            <ul class="stack-list" id="duplicates-list">
+              <li>Loading duplicate candidates...</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h2>Route Snapshots</h2>
+            <ul class="stack-list" id="routes-list">
+              <li>Loading route snapshots...</li>
+            </ul>
+          </article>
         </section>
 
         <section class="card">
-          <h2>Backend</h2>
-          <p>FastAPI serves your API and the production frontend bundle.</p>
-        </section>
-
-        <section class="card card-status">
-          <h2>API Status</h2>
-          <p id="status-text">Checking backend connection...</p>
+          <h2>Allocation Blocks</h2>
+          <div class="table-shell">
+            <table>
+              <thead>
+                <tr>
+                  <th>Range</th>
+                  <th>Block</th>
+                  <th>Source</th>
+                </tr>
+              </thead>
+              <tbody id="blocks-body">
+                <tr>
+                  <td colspan="3">Loading block ranges...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </section>
       </main>
     </div>

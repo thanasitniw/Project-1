@@ -22,6 +22,16 @@ then ship the built image to a Linux server.
 docker compose up --build
 ```
 
+By default the backend reads ASN source files from:
+
+- `/Users/ta/Documents/ASN`
+
+If you want a different folder on your Mac, override it when starting Docker:
+
+```bash
+HOST_ASN_DATA_DIR=/your/asn/folder docker compose up --build
+```
+
 Then open:
 
 - Frontend: http://localhost:5173
@@ -31,7 +41,11 @@ Then open:
 
 ```bash
 docker buildx build --platform linux/amd64 -t project-1:latest .
-docker run --rm -p 8000:8000 project-1:latest
+docker run --rm \
+  -p 8000:8000 \
+  -e ASN_SOURCE_DIR=/asn-source \
+  -v /path/to/asn-data:/asn-source:ro \
+  project-1:latest
 ```
 
 Open http://localhost:8000
