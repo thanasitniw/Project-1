@@ -1,2 +1,14 @@
 # macOS
 .DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Node
+node_modules/
+frontend/dist/
+
+# Environment
+.env
