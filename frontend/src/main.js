@@ -45,7 +45,7 @@ function setFeedback(message, tone = "neutral") {
 }
 
 function getPoolStats(poolKey) {
-  return pools[poolKey]?.stats ?? { total: 0, assigned: 0, reserved: 0, available: 0, nextFree: null };
+  return pools[poolKey]?.stats ?? { total: 0, assigned: 0, reserved: 0, decom: 0, available: 0, nextFree: null };
 }
 
 function getActivePool() {
@@ -93,7 +93,7 @@ function fillEditForm(row) {
   regionInput.value = row.region;
   routerInput.value = row.router;
   assignmentTypeInput.value = row.type;
-  assignmentStatusInput.value = row.status === "Decom" ? "Assigned" : row.status;
+  assignmentStatusInput.value = row.status;
   assignedByInput.value = row.assignedBy ?? "";
   descriptionInput.value = row.description ?? "";
   setFeedback(`Editing ${row.asn} in the ${activePool} pool.`, "success");
@@ -145,15 +145,20 @@ function renderStats() {
       <span>planned sites</span>
     </article>
     <article class="summary-card">
+      <p>Decommissioned</p>
+      <h3 class="accent-slate">${stats.decom}</h3>
+      <span>held out of reuse</span>
+    </article>
+    <article class="summary-card">
       <p>Available</p>
       <h3>${stats.available.toLocaleString()}</h3>
       <span>next free: ${stats.nextFree ?? "n/a"}</span>
     </article>
   `;
 
-  const usedCount = stats.assigned + stats.reserved;
-  utilizationText.textContent = `${usedCount} / ${stats.total.toLocaleString()} used (${stats.total ? ((usedCount / stats.total) * 100).toFixed(1) : "0.0"}%)`;
-  utilizationFill.style.width = `${Math.max(stats.total ? (usedCount / stats.total) * 100 : 0, 1)}%`;
+  const occupiedCount = stats.assigned + stats.reserved + stats.decom;
+  utilizationText.textContent = `${occupiedCount} / ${stats.total.toLocaleString()} occupied (${stats.total ? ((occupiedCount / stats.total) * 100).toFixed(1) : "0.0"}%)`;
+  utilizationFill.style.width = `${Math.max(stats.total ? (occupiedCount / stats.total) * 100 : 0, 1)}%`;
   poolLabel.textContent = pool.rangeLabel;
 }
 

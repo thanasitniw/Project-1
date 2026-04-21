@@ -35,7 +35,7 @@ class AssignmentUpdate(BaseModel):
     region: str = Field(min_length=1)
     router: str = Field(min_length=1)
     type: Literal["iBGP", "eBGP", "MPLS"]
-    status: Literal["Assigned", "Reserved"]
+    status: Literal["Assigned", "Reserved", "Decom"]
     assigned_by: str = Field(min_length=1)
     description: str = ""
 
@@ -56,11 +56,13 @@ def get_stats(pool: dict) -> dict[str, int | None]:
     total = pool["maxAsn"] - pool["minAsn"] + 1
     assigned = sum(1 for row in pool["rows"] if row["status"] == "Assigned")
     reserved = sum(1 for row in pool["rows"] if row["status"] == "Reserved")
-    available = total - assigned - reserved
+    decom = sum(1 for row in pool["rows"] if row["status"] == "Decom")
+    available = total - assigned - reserved - decom
     return {
         "total": total,
         "assigned": assigned,
         "reserved": reserved,
+        "decom": decom,
         "available": available,
         "nextFree": find_next_free_asn(pool),
     }
