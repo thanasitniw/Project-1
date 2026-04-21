@@ -3,197 +3,85 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ASN Management Console</title>
+    <title>Private ASN Manager</title>
     <script type="module" src="/src/main.js"></script>
   </head>
   <body>
-    <div class="app-shell">
-      <aside class="sidebar">
-        <div class="brand">
-          <span class="brand-mark">as</span>
-          <div>
-            <p class="brand-kicker">Network Tools</p>
-            <h1>ASN Console</h1>
+    <main class="page-shell">
+      <header class="page-header">
+        <div>
+          <h1>Private ASN Manager</h1>
+          <p class="subtitle">IP Core Network <span id="pool-label">2-byte pool: 64512-65534</span></p>
+        </div>
+
+        <div class="header-actions">
+          <div class="segmented-control">
+            <button class="segment is-active" data-pool="2-byte">2-byte</button>
+            <button class="segment" data-pool="4-byte">4-byte</button>
+          </div>
+          <button class="assign-button">+ Assign new ASN ↗</button>
+        </div>
+      </header>
+
+      <section class="summary-grid" id="stats-grid"></section>
+
+      <section class="assignment-section">
+        <div class="section-header">
+          <h2>ASN assignments</h2>
+
+          <div class="filters-row">
+            <label class="search-box">
+              <span class="visually-hidden">Search</span>
+              <input id="search-input" type="search" placeholder="Search site, hostname" />
+            </label>
+
+            <select class="select-box" id="status-filter">
+              <option value="all">All status</option>
+              <option value="Assigned">Assigned</option>
+              <option value="Reserved">Reserved</option>
+              <option value="Decom">Decom</option>
+            </select>
+
+            <select class="select-box" id="type-filter">
+              <option value="all">All type</option>
+              <option value="iBGP">iBGP</option>
+              <option value="eBGP">eBGP</option>
+              <option value="MPLS">MPLS</option>
+            </select>
           </div>
         </div>
 
-        <nav class="nav-stack">
-          <button class="nav-item nav-item-active">Dashboard</button>
-          <button class="nav-item">ASN Inventory</button>
-          <button class="nav-item">Requests</button>
-          <button class="nav-item">Audit Log</button>
-          <button class="nav-item">Exports</button>
-        </nav>
+        <div class="table-panel">
+          <table>
+            <thead>
+              <tr>
+                <th>ASN</th>
+                <th>Site / PoP</th>
+                <th>Region</th>
+                <th>Router Hostname</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Assigned</th>
+              </tr>
+            </thead>
+            <tbody id="asn-table-body"></tbody>
+          </table>
+        </div>
+      </section>
 
-        <section class="sidebar-card">
-          <p class="sidebar-label">Role Context</p>
-          <h2>Engineer View</h2>
-          <p>Can request, assign, edit status, and review conflict checks.</p>
-        </section>
+      <section class="utilization-panel">
+        <div class="utilization-header">
+          <h2>Pool utilization</h2>
+          <p id="utilization-text">0 / 0 used (0%)</p>
+        </div>
+        <div class="utilization-bar">
+          <span class="utilization-fill" id="utilization-fill"></span>
+        </div>
+      </section>
 
-        <section class="sidebar-card">
-          <p class="sidebar-label">UI Direction</p>
-          <p>Mock data only for this first pass. We can wire the real workflow next.</p>
-        </section>
-      </aside>
-
-      <main class="main-panel">
-        <header class="topbar">
-          <div>
-            <p class="eyebrow">IPCORE Network</p>
-            <h2>ASN Management Dashboard</h2>
-          </div>
-
-          <div class="topbar-actions">
-            <label class="search-box">
-              <span class="visually-hidden">Search</span>
-              <input id="search-input" type="search" placeholder="Search ASN, site, router..." />
-            </label>
-            <button class="ghost-button">Export</button>
-            <button class="primary-button">New Request</button>
-          </div>
-        </header>
-
-        <section class="toolbar">
-          <div class="segmented-control">
-            <button class="segment is-active" data-pool="2-byte">2-byte Pool</button>
-            <button class="segment" data-pool="4-byte">4-byte Pool</button>
-          </div>
-
-          <div class="filter-pills">
-            <button class="filter-pill filter-pill-active">All</button>
-            <button class="filter-pill">Assigned</button>
-            <button class="filter-pill">Reserved</button>
-            <button class="filter-pill">Conflict</button>
-            <button class="filter-pill">Decommissioned</button>
-          </div>
-        </section>
-
-        <section class="stats-grid" id="stats-grid"></section>
-
-        <section class="content-grid">
-          <article class="panel panel-wide">
-            <div class="panel-heading">
-              <div>
-                <p class="panel-kicker">Pool Utilization</p>
-                <h3>Assignment Timeline</h3>
-              </div>
-              <p class="panel-meta">Mock trend for current reference UI direction</p>
-            </div>
-
-            <div class="chart-card">
-              <div class="chart-legend">
-                <span><i class="legend-dot dot-assigned"></i>Assigned</span>
-                <span><i class="legend-dot dot-reserved"></i>Reserved</span>
-                <span><i class="legend-dot dot-available"></i>Available</span>
-              </div>
-              <div class="chart-grid" id="chart-grid"></div>
-              <div class="chart-axis">
-                <span>Jan</span>
-                <span>Feb</span>
-                <span>Mar</span>
-                <span>Apr</span>
-                <span>May</span>
-                <span>Jun</span>
-              </div>
-            </div>
-          </article>
-
-          <article class="panel">
-            <div class="panel-heading">
-              <div>
-                <p class="panel-kicker">Health</p>
-                <h3>System Snapshot</h3>
-              </div>
-            </div>
-            <ul class="status-list">
-              <li>
-                <span>API Status</span>
-                <strong id="status-text">Checking backend...</strong>
-              </li>
-              <li>
-                <span>Conflict Engine</span>
-                <strong>Enabled</strong>
-              </li>
-              <li>
-                <span>Audit Mode</span>
-                <strong>Tracking All Actions</strong>
-              </li>
-              <li>
-                <span>Role Scope</span>
-                <strong>Viewer / Engineer / Admin</strong>
-              </li>
-            </ul>
-          </article>
-        </section>
-
-        <section class="content-grid">
-          <article class="panel panel-wide">
-            <div class="panel-heading">
-              <div>
-                <p class="panel-kicker">Inventory</p>
-                <h3>ASN Assignment Table</h3>
-              </div>
-              <p class="panel-meta">Click a row to expand BGP neighbor summary</p>
-            </div>
-
-            <div class="table-shell">
-              <table>
-                <thead>
-                  <tr>
-                    <th>ASN</th>
-                    <th>Site / Region</th>
-                    <th>Router</th>
-                    <th>Purpose</th>
-                    <th>Status</th>
-                    <th>Assigned By</th>
-                  </tr>
-                </thead>
-                <tbody id="asn-table-body"></tbody>
-              </table>
-            </div>
-          </article>
-
-          <article class="panel">
-            <div class="panel-heading">
-              <div>
-                <p class="panel-kicker">Action Center</p>
-                <h3>Pending Requests</h3>
-              </div>
-            </div>
-
-            <ul class="request-list" id="request-list"></ul>
-          </article>
-        </section>
-
-        <section class="content-grid">
-          <article class="panel">
-            <div class="panel-heading">
-              <div>
-                <p class="panel-kicker">Audit</p>
-                <h3>Recent Activity</h3>
-              </div>
-            </div>
-
-            <ul class="timeline" id="timeline"></ul>
-          </article>
-
-          <article class="panel">
-            <div class="panel-heading">
-              <div>
-                <p class="panel-kicker">Exports</p>
-                <h3>Documentation Outputs</h3>
-              </div>
-            </div>
-
-            <div class="export-card">
-              <button class="primary-button block-button">Download CSV</button>
-              <button class="ghost-button block-button">Generate PDF</button>
-              <p class="caption">We will connect these buttons to backend exports next.</p>
-            </div>
-          </article>
-        </section>
-      </main>
-    </div>
+      <section class="footer-note">
+        <p id="status-text">Checking backend...</p>
+      </section>
+    </main>
   </body>
 </html>
