@@ -23,7 +23,7 @@
         </div>
 
         <div class="header-actions">
-          <button class="assign-button">+ Assign new ASN ↗</button>
+          <button class="assign-button" id="open-assign-modal" type="button">+ Assign new ASN ↗</button>
         </div>
       </header>
 
@@ -87,5 +87,96 @@
         <p id="status-text">Checking backend...</p>
       </section>
     </main>
+
+    <div class="modal-backdrop is-hidden" id="assign-modal-backdrop">
+      <section
+        class="assign-modal"
+        id="assign-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="assign-modal-title"
+      >
+        <div class="modal-header">
+          <div>
+            <p class="modal-kicker">Assignment workflow</p>
+            <h2 id="assign-modal-title">Assign new ASN</h2>
+            <p class="modal-copy">Create a new ASN assignment with auto-pick or a manual ASN number.</p>
+          </div>
+          <button class="modal-close" id="close-assign-modal" type="button" aria-label="Close modal">×</button>
+        </div>
+
+        <form class="assign-form" id="assign-form">
+          <div class="form-grid form-grid-wide">
+            <label class="field-group">
+              <span>Assignment mode</span>
+              <div class="segmented-control segmented-control-form">
+                <button class="segment is-active" id="mode-auto" type="button" data-assign-mode="auto">Auto assign</button>
+                <button class="segment" id="mode-manual" type="button" data-assign-mode="manual">Manual ASN</button>
+              </div>
+            </label>
+
+            <label class="field-group">
+              <span>ASN number</span>
+              <input id="asn-number-input" name="asnNumber" type="number" placeholder="Auto-selected from pool" disabled />
+            </label>
+          </div>
+
+          <div class="form-grid">
+            <label class="field-group">
+              <span>Site / PoP</span>
+              <input id="site-input" name="site" type="text" placeholder="BKK-POP-03" required />
+            </label>
+
+            <label class="field-group">
+              <span>Region</span>
+              <input id="region-input" name="region" type="text" placeholder="BKK" required />
+            </label>
+          </div>
+
+          <div class="form-grid">
+            <label class="field-group">
+              <span>Router hostname</span>
+              <input id="router-input" name="router" type="text" placeholder="bkk-pe03.ipcore.net" required />
+            </label>
+
+            <label class="field-group">
+              <span>Assignment type</span>
+              <select id="assignment-type-input" name="type">
+                <option value="iBGP">iBGP</option>
+                <option value="eBGP">eBGP</option>
+                <option value="MPLS">MPLS</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="form-grid">
+            <label class="field-group">
+              <span>Status</span>
+              <select id="assignment-status-input" name="status">
+                <option value="Assigned">Assigned</option>
+                <option value="Reserved">Reserved</option>
+              </select>
+            </label>
+
+            <label class="field-group">
+              <span>Assigned by</span>
+              <input id="assigned-by-input" name="assignedBy" type="text" placeholder="Network Engineer" required />
+            </label>
+          </div>
+
+          <label class="field-group">
+            <span>Description / purpose</span>
+            <textarea id="description-input" name="description" rows="3" placeholder="iBGP for PE expansion, customer edge handoff, MPLS service edge, etc."></textarea>
+          </label>
+
+          <p class="form-feedback" id="form-feedback">Next available ASN will be suggested automatically from the active pool.</p>
+
+          <div class="modal-actions">
+            <button class="secondary-button" id="cancel-assign-modal" type="button">Cancel</button>
+            <button class="primary-submit-button" type="submit">Save assignment</button>
+          </div>
+        </form>
+      </section>
+    </div>
   </body>
 </html>
