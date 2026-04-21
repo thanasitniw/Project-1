@@ -10,4 +10,8 @@ services:
     container_name: asn-web-app
     ports:
       - "8000:8000"
+    environment:
+      ASN_DATA_FILE: /app/data/asn_store.json
+    volumes:
+      - ./data:/app/data
     restart: unless-stopped

@@ -513,6 +513,19 @@ tbody tr:last-child td {
   margin: 4px 0 0;
   color: #d4ccbf;
   font-size: 0.95rem;
+  min-height: 1.4em;
+}
+
+.form-feedback[data-tone="pending"] {
+  color: #d8c07c;
+}
+
+.form-feedback[data-tone="error"] {
+  color: #e69d9d;
+}
+
+.form-feedback[data-tone="success"] {
+  color: #8fd4bc;
 }
 
 .modal-actions {
@@ -529,6 +542,12 @@ tbody tr:last-child td {
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
+}
+
+.secondary-button:disabled,
+.primary-submit-button:disabled {
+  opacity: 0.7;
+  cursor: wait;
 }
 
 .secondary-button {
