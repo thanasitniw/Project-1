@@ -3,47 +3,194 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Project 1</title>
+    <title>ASN Management Console</title>
     <script type="module" src="/src/main.js"></script>
   </head>
   <body>
-    <div class="page-shell">
-      <header class="hero">
-        <p class="eyebrow">Fresh Start</p>
-        <h1>Ready for the next idea.</h1>
-        <p class="hero-copy">
-          The previous data-driven prototype has been removed so we can rebuild
-          this app around your new direction.
-        </p>
-      </header>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <span class="brand-mark">as</span>
+          <div>
+            <p class="brand-kicker">Network Tools</p>
+            <h1>ASN Console</h1>
+          </div>
+        </div>
 
-      <main class="dashboard">
-        <section class="meta-row">
-          <article class="card card-wide">
-            <h2>Reset Complete</h2>
-            <p class="muted">No external data source is connected right now.</p>
-            <p class="caption">Send your idea and examples, then we will rebuild from here.</p>
+        <nav class="nav-stack">
+          <button class="nav-item nav-item-active">Dashboard</button>
+          <button class="nav-item">ASN Inventory</button>
+          <button class="nav-item">Requests</button>
+          <button class="nav-item">Audit Log</button>
+          <button class="nav-item">Exports</button>
+        </nav>
+
+        <section class="sidebar-card">
+          <p class="sidebar-label">Role Context</p>
+          <h2>Engineer View</h2>
+          <p>Can request, assign, edit status, and review conflict checks.</p>
+        </section>
+
+        <section class="sidebar-card">
+          <p class="sidebar-label">UI Direction</p>
+          <p>Mock data only for this first pass. We can wire the real workflow next.</p>
+        </section>
+      </aside>
+
+      <main class="main-panel">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">IPCORE Network</p>
+            <h2>ASN Management Dashboard</h2>
+          </div>
+
+          <div class="topbar-actions">
+            <label class="search-box">
+              <span class="visually-hidden">Search</span>
+              <input id="search-input" type="search" placeholder="Search ASN, site, router..." />
+            </label>
+            <button class="ghost-button">Export</button>
+            <button class="primary-button">New Request</button>
+          </div>
+        </header>
+
+        <section class="toolbar">
+          <div class="segmented-control">
+            <button class="segment is-active" data-pool="2-byte">2-byte Pool</button>
+            <button class="segment" data-pool="4-byte">4-byte Pool</button>
+          </div>
+
+          <div class="filter-pills">
+            <button class="filter-pill filter-pill-active">All</button>
+            <button class="filter-pill">Assigned</button>
+            <button class="filter-pill">Reserved</button>
+            <button class="filter-pill">Conflict</button>
+            <button class="filter-pill">Decommissioned</button>
+          </div>
+        </section>
+
+        <section class="stats-grid" id="stats-grid"></section>
+
+        <section class="content-grid">
+          <article class="panel panel-wide">
+            <div class="panel-heading">
+              <div>
+                <p class="panel-kicker">Pool Utilization</p>
+                <h3>Assignment Timeline</h3>
+              </div>
+              <p class="panel-meta">Mock trend for current reference UI direction</p>
+            </div>
+
+            <div class="chart-card">
+              <div class="chart-legend">
+                <span><i class="legend-dot dot-assigned"></i>Assigned</span>
+                <span><i class="legend-dot dot-reserved"></i>Reserved</span>
+                <span><i class="legend-dot dot-available"></i>Available</span>
+              </div>
+              <div class="chart-grid" id="chart-grid"></div>
+              <div class="chart-axis">
+                <span>Jan</span>
+                <span>Feb</span>
+                <span>Mar</span>
+                <span>Apr</span>
+                <span>May</span>
+                <span>Jun</span>
+              </div>
+            </div>
           </article>
-          <article class="card card-status">
-            <h2>API Status</h2>
-            <p id="status-text">Checking backend connection...</p>
+
+          <article class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="panel-kicker">Health</p>
+                <h3>System Snapshot</h3>
+              </div>
+            </div>
+            <ul class="status-list">
+              <li>
+                <span>API Status</span>
+                <strong id="status-text">Checking backend...</strong>
+              </li>
+              <li>
+                <span>Conflict Engine</span>
+                <strong>Enabled</strong>
+              </li>
+              <li>
+                <span>Audit Mode</span>
+                <strong>Tracking All Actions</strong>
+              </li>
+              <li>
+                <span>Role Scope</span>
+                <strong>Viewer / Engineer / Admin</strong>
+              </li>
+            </ul>
           </article>
         </section>
 
-        <section class="three-up">
-          <article class="card">
-            <h2>Step 1</h2>
-            <p>Tell me what kind of app you want to build and who it is for.</p>
+        <section class="content-grid">
+          <article class="panel panel-wide">
+            <div class="panel-heading">
+              <div>
+                <p class="panel-kicker">Inventory</p>
+                <h3>ASN Assignment Table</h3>
+              </div>
+              <p class="panel-meta">Click a row to expand BGP neighbor summary</p>
+            </div>
+
+            <div class="table-shell">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ASN</th>
+                    <th>Site / Region</th>
+                    <th>Router</th>
+                    <th>Purpose</th>
+                    <th>Status</th>
+                    <th>Assigned By</th>
+                  </tr>
+                </thead>
+                <tbody id="asn-table-body"></tbody>
+              </table>
+            </div>
           </article>
 
-          <article class="card">
-            <h2>Step 2</h2>
-            <p>Show me reference screens, notes, or workflow examples you like.</p>
+          <article class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="panel-kicker">Action Center</p>
+                <h3>Pending Requests</h3>
+              </div>
+            </div>
+
+            <ul class="request-list" id="request-list"></ul>
+          </article>
+        </section>
+
+        <section class="content-grid">
+          <article class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="panel-kicker">Audit</p>
+                <h3>Recent Activity</h3>
+              </div>
+            </div>
+
+            <ul class="timeline" id="timeline"></ul>
           </article>
 
-          <article class="card">
-            <h2>Step 3</h2>
-            <p>I will design and implement a new version from this clean base.</p>
+          <article class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="panel-kicker">Exports</p>
+                <h3>Documentation Outputs</h3>
+              </div>
+            </div>
+
+            <div class="export-card">
+              <button class="primary-button block-button">Download CSV</button>
+              <button class="ghost-button block-button">Generate PDF</button>
+              <p class="caption">We will connect these buttons to backend exports next.</p>
+            </div>
           </article>
         </section>
       </main>
