@@ -57,7 +57,7 @@ function renderStats() {
     <article class="summary-card">
       <p>Total pool</p>
       <h3>${pool.total.toLocaleString()}</h3>
-      <span>${pool.rangeLabel.replace(" pool:", " -")}</span>
+      <span>${pool.rangeLabel.replace(" pool:", " —")}</span>
     </article>
     <article class="summary-card">
       <p>Assigned</p>
@@ -115,7 +115,7 @@ function renderTable() {
     .map(
       (row) => `
         <tr>
-          <td class="asn-link">${row.asn}</td>
+          <td><button class="asn-link" type="button">${row.asn}</button></td>
           <td>${row.site}</td>
           <td>${row.region}</td>
           <td class="router-cell">${row.router}</td>
