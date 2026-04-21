@@ -23,6 +23,7 @@
         </div>
 
         <div class="header-actions">
+          <button class="export-button" id="export-csv-button" type="button">Export CSV</button>
           <button class="assign-button" id="open-assign-modal" type="button">+ Assign new ASN ↗</button>
         </div>
       </header>
@@ -66,6 +67,7 @@
                 <th>Type</th>
                 <th>Status</th>
                 <th>Assigned</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody id="asn-table-body"></tbody>
@@ -106,6 +108,9 @@
         </div>
 
         <form class="assign-form" id="assign-form">
+          <div class="edit-banner is-hidden" id="edit-banner">
+            Editing existing assignment <strong id="editing-assignment-label">ASN</strong>
+          </div>
           <div class="form-grid form-grid-wide">
             <label class="field-group">
               <span>Assignment mode</span>

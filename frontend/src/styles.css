@@ -97,6 +97,7 @@ body.modal-open {
   display: flex;
   flex: 0 0 auto;
   align-items: center;
+  gap: 12px;
 }
 
 .segmented-control {
@@ -133,6 +134,17 @@ body.modal-open {
   padding: 22px 28px;
   cursor: pointer;
   text-align: center;
+}
+
+.export-button {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #f3ede1;
+  font-size: 0.98rem;
+  font-weight: 600;
+  padding: 18px 20px;
+  cursor: pointer;
 }
 
 .summary-grid {
@@ -288,7 +300,12 @@ td:nth-child(6) {
 
 th:nth-child(7),
 td:nth-child(7) {
-  width: 14%;
+  width: 12%;
+}
+
+th:nth-child(8),
+td:nth-child(8) {
+  width: 16%;
 }
 
 tbody tr:last-child td {
@@ -390,6 +407,33 @@ tbody tr:last-child td {
   opacity: 0.7;
 }
 
+.row-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.table-action-button {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #ece5d9;
+  font: inherit;
+  font-size: 0.92rem;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.table-action-button.danger {
+  color: #efbfbd;
+  border-color: rgba(218, 112, 112, 0.25);
+}
+
+.table-action-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -460,6 +504,17 @@ tbody tr:last-child td {
   display: grid;
   gap: 18px;
   margin-top: 24px;
+}
+
+.edit-banner {
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #ddd5c9;
+}
+
+.edit-banner.is-hidden {
+  display: none;
 }
 
 .form-grid {
@@ -599,6 +654,10 @@ tbody tr:last-child td {
 
   .assign-button {
     min-width: 0;
+    width: 100%;
+  }
+
+  .export-button {
     width: 100%;
   }
 

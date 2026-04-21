@@ -1,9 +1,11 @@
 from pathlib import Path
 from typing import Literal
 from datetime import date
+from io import StringIO
+import csv
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -19,6 +21,16 @@ app = FastAPI(title="Project 1 API")
 class AssignmentCreate(BaseModel):
     pool: Literal["2-byte", "4-byte"]
     asn_number: int | None = None
+    site: str = Field(min_length=1)
+    region: str = Field(min_length=1)
+    router: str = Field(min_length=1)
+    type: Literal["iBGP", "eBGP", "MPLS"]
+    status: Literal["Assigned", "Reserved"]
+    assigned_by: str = Field(min_length=1)
+    description: str = ""
+
+
+class AssignmentUpdate(BaseModel):
     site: str = Field(min_length=1)
     region: str = Field(min_length=1)
     router: str = Field(min_length=1)
@@ -54,6 +66,19 @@ def get_stats(pool: dict) -> dict[str, int | None]:
     }
 
 
+def get_pool(store: dict, pool_name: str) -> dict:
+    if pool_name not in store:
+        raise HTTPException(status_code=404, detail=f"Pool {pool_name} was not found.")
+    return store[pool_name]
+
+
+def find_assignment(pool: dict, asn: str) -> dict:
+    for row in pool["rows"]:
+        if row["asn"] == asn:
+            return row
+    raise HTTPException(status_code=404, detail=f"Assignment {asn} was not found in this pool.")
+
+
 def build_response(store: dict) -> dict:
     return {
         "pools": {
@@ -79,7 +104,7 @@ def get_asn_pools() -> dict:
 @app.post("/api/assignments")
 def create_assignment(payload: AssignmentCreate) -> dict:
     store = load_store()
-    pool = store[payload.pool]
+    pool = get_pool(store, payload.pool)
 
     requested_asn = payload.asn_number if payload.asn_number is not None else find_next_free_asn(pool)
     if requested_asn is None:
@@ -113,6 +138,82 @@ def create_assignment(payload: AssignmentCreate) -> dict:
         "assignment": assignment,
         **build_response(saved),
     }
+
+
+@app.put("/api/assignments/{pool_name}/{asn}")
+def update_assignment(pool_name: str, asn: str, payload: AssignmentUpdate) -> dict:
+    store = load_store()
+    pool = get_pool(store, pool_name)
+    assignment = find_assignment(pool, asn)
+
+    assignment.update(
+        {
+            "site": payload.site.strip(),
+            "region": payload.region.strip().upper(),
+            "router": payload.router.strip() or "-",
+            "type": payload.type,
+            "status": payload.status,
+            "assignedBy": payload.assigned_by.strip(),
+            "description": payload.description.strip(),
+        }
+    )
+
+    saved = save_store(store)
+    return {
+        "message": f"Assignment {asn} updated in the {pool_name} pool.",
+        "assignment": assignment,
+        **build_response(saved),
+    }
+
+
+@app.post("/api/assignments/{pool_name}/{asn}/decommission")
+def decommission_assignment(pool_name: str, asn: str) -> dict:
+    store = load_store()
+    pool = get_pool(store, pool_name)
+    assignment = find_assignment(pool, asn)
+
+    assignment["status"] = "Decom"
+    assignment["description"] = assignment.get("description", "").strip() or "Marked as decommissioned"
+
+    saved = save_store(store)
+    return {
+        "message": f"Assignment {asn} marked as decommissioned.",
+        "assignment": assignment,
+        **build_response(saved),
+    }
+
+
+@app.get("/api/assignments/export.csv")
+def export_assignments_csv(pool: Literal["2-byte", "4-byte"]) -> Response:
+    store = load_store()
+    selected_pool = get_pool(store, pool)
+
+    buffer = StringIO()
+    writer = csv.writer(buffer)
+    writer.writerow(["pool", "asn", "site", "region", "router", "type", "status", "assigned", "assigned_by", "description"])
+    for row in selected_pool["rows"]:
+        writer.writerow(
+            [
+                pool,
+                row["asn"],
+                row["site"],
+                row["region"],
+                row["router"],
+                row["type"],
+                row["status"],
+                row["assigned"],
+                row.get("assignedBy", ""),
+                row.get("description", ""),
+            ]
+        )
+
+    csv_content = buffer.getvalue()
+    filename = f"asn-assignments-{pool}.csv"
+    return Response(
+        content=csv_content,
+        media_type="text/csv",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 if STATIC_DIR.exists():
