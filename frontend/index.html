@@ -12,14 +12,17 @@
         <div class="headline-block">
           <p class="eyebrow">IPCORE NETWORK</p>
           <h1>Private ASN Manager</h1>
-          <p class="subtitle"><span id="pool-label">2-byte pool: 64512-65534</span></p>
+          <p class="subtitle">IP Core Network <span class="separator">—</span> <span id="pool-label">2-byte pool: 64512-65534</span></p>
+          <div class="pool-switch-row">
+            <span class="pool-switch-label">Pool view</span>
+            <div class="segmented-control">
+              <button class="segment is-active" data-pool="2-byte">2-byte</button>
+              <button class="segment" data-pool="4-byte">4-byte</button>
+            </div>
+          </div>
         </div>
 
         <div class="header-actions">
-          <div class="segmented-control">
-            <button class="segment is-active" data-pool="2-byte">2-byte</button>
-            <button class="segment" data-pool="4-byte">4-byte</button>
-          </div>
           <button class="assign-button">+ Assign new ASN ↗</button>
         </div>
       </header>
@@ -67,16 +70,16 @@
             </thead>
             <tbody id="asn-table-body"></tbody>
           </table>
-        </div>
-      </section>
 
-      <section class="utilization-panel">
-        <div class="utilization-header">
-          <h2>Pool utilization</h2>
-          <p id="utilization-text">0 / 0 used (0%)</p>
-        </div>
-        <div class="utilization-bar">
-          <span class="utilization-fill" id="utilization-fill"></span>
+          <section class="utilization-panel">
+            <div class="utilization-header">
+              <h2>Pool utilization</h2>
+              <p id="utilization-text">0 / 0 used (0%)</p>
+            </div>
+            <div class="utilization-bar">
+              <span class="utilization-fill" id="utilization-fill"></span>
+            </div>
+          </section>
         </div>
       </section>
 
