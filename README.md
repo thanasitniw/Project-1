@@ -46,13 +46,7 @@ The names you should look for in Docker Desktop are:
 docker compose up --build
 ```
 
-By default the backend reads ASN source files from:
-
-- `/Users/ta/Documents/ASN`
-
-The current app only reads:
-
-- `ASN-Assigment.master.xlsx`
+There is no external data source connected right now.
 
 If you want a different folder on your Mac, override it when starting Docker:
 

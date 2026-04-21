@@ -6,11 +6,8 @@ services:
       target: dev-backend
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     working_dir: /app/backend
-    environment:
-      ASN_SOURCE_DIR: /asn-source
     volumes:
       - ./backend:/app/backend
-      - ${HOST_ASN_DATA_DIR:-/Users/ta/Documents/ASN}:/asn-source:ro
     ports:
       - "8000:8000"
 
