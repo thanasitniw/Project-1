@@ -8,6 +8,7 @@ const statusFilter = document.querySelector("#status-filter");
 const typeFilter = document.querySelector("#type-filter");
 const utilizationText = document.querySelector("#utilization-text");
 const utilizationFill = document.querySelector("#utilization-fill");
+const auditLogList = document.querySelector("#audit-log-list");
 const poolLabel = document.querySelector("#pool-label");
 const poolButtons = document.querySelectorAll("[data-pool]");
 const exportCsvButton = document.querySelector("#export-csv-button");
@@ -33,6 +34,7 @@ const editBanner = document.querySelector("#edit-banner");
 const editingAssignmentLabel = document.querySelector("#editing-assignment-label");
 
 let pools = {};
+let auditLog = [];
 let activePool = "2-byte";
 let assignMode = "auto";
 let editingAssignment = null;
@@ -208,12 +210,46 @@ function renderTable() {
     .join("");
 }
 
+function formatAuditTimestamp(value) {
+  try {
+    return new Intl.DateTimeFormat("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "Asia/Bangkok",
+    }).format(new Date(value));
+  } catch {
+    return value;
+  }
+}
+
+function renderAuditLog() {
+  auditLogList.innerHTML = auditLog
+    .map(
+      (item) => `
+        <article class="audit-item">
+          <div class="audit-item-head">
+            <span class="audit-pill audit-pill-${item.action}">${item.action}</span>
+            <span class="audit-meta">${item.pool} • ${item.asn} • ${item.actor}</span>
+          </div>
+          <p class="audit-message">${item.message}</p>
+          <p class="audit-time">${formatAuditTimestamp(item.timestamp)}</p>
+        </article>
+      `,
+    )
+    .join("");
+}
+
 function render() {
   if (!pools[activePool]) {
     return;
   }
   renderStats();
   renderTable();
+  renderAuditLog();
 }
 
 async function refreshPools() {
@@ -223,6 +259,7 @@ async function refreshPools() {
   }
   const payload = await response.json();
   pools = payload.pools;
+  auditLog = payload.auditLog ?? [];
   render();
 }
 
@@ -251,6 +288,7 @@ async function handleDecommission(asn) {
       throw new Error(payload.detail ?? "Unable to decommission assignment.");
     }
     pools = payload.pools;
+    auditLog = payload.auditLog ?? [];
     render();
     statusText.textContent = payload.message;
   } catch (error) {
@@ -367,6 +405,7 @@ assignForm.addEventListener("submit", async (event) => {
     }
 
     pools = payload.pools;
+    auditLog = payload.auditLog ?? [];
     render();
     closeAssignModal();
     statusText.textContent = payload.message;

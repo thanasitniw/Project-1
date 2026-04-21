@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Literal
-from datetime import date
+from datetime import date, datetime, timezone
 from io import StringIO
 import csv
 
@@ -67,9 +67,9 @@ def get_stats(pool: dict) -> dict[str, int | None]:
 
 
 def get_pool(store: dict, pool_name: str) -> dict:
-    if pool_name not in store:
+    if pool_name not in store["pools"]:
         raise HTTPException(status_code=404, detail=f"Pool {pool_name} was not found.")
-    return store[pool_name]
+    return store["pools"][pool_name]
 
 
 def find_assignment(pool: dict, asn: str) -> dict:
@@ -86,9 +86,25 @@ def build_response(store: dict) -> dict:
                 **pool,
                 "stats": get_stats(pool),
             }
-            for name, pool in store.items()
-        }
+            for name, pool in store["pools"].items()
+        },
+        "auditLog": store.get("auditLog", [])[:20],
     }
+
+
+def append_audit_log(store: dict, *, action: str, pool: str, asn: str, actor: str, message: str) -> None:
+    store.setdefault("auditLog", [])
+    store["auditLog"].insert(
+        0,
+        {
+            "timestamp": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+            "action": action,
+            "pool": pool,
+            "asn": asn,
+            "actor": actor,
+            "message": message,
+        },
+    )
 
 
 @app.get("/api/health")
@@ -132,6 +148,14 @@ def create_assignment(payload: AssignmentCreate) -> dict:
     }
 
     pool["rows"].insert(0, assignment)
+    append_audit_log(
+        store,
+        action="assign" if payload.status == "Assigned" else "reserve",
+        pool=payload.pool,
+        asn=assignment["asn"],
+        actor=assignment["assignedBy"],
+        message=f"{payload.status} {assignment['asn']} for {assignment['site']}.",
+    )
     saved = save_store(store)
     return {
         "message": f"Assignment saved: AS{requested_asn} added to the {payload.pool} pool.",
@@ -158,6 +182,14 @@ def update_assignment(pool_name: str, asn: str, payload: AssignmentUpdate) -> di
         }
     )
 
+    append_audit_log(
+        store,
+        action="edit",
+        pool=pool_name,
+        asn=asn,
+        actor=assignment["assignedBy"],
+        message=f"Updated {asn} details for {assignment['site']}.",
+    )
     saved = save_store(store)
     return {
         "message": f"Assignment {asn} updated in the {pool_name} pool.",
@@ -175,6 +207,14 @@ def decommission_assignment(pool_name: str, asn: str) -> dict:
     assignment["status"] = "Decom"
     assignment["description"] = assignment.get("description", "").strip() or "Marked as decommissioned"
 
+    append_audit_log(
+        store,
+        action="decommission",
+        pool=pool_name,
+        asn=asn,
+        actor=assignment.get("assignedBy", "system"),
+        message=f"Marked {asn} as decommissioned.",
+    )
     saved = save_store(store)
     return {
         "message": f"Assignment {asn} marked as decommissioned.",

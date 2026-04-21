@@ -407,6 +407,89 @@ tbody tr:last-child td {
   opacity: 0.7;
 }
 
+.audit-section {
+  margin-top: 34px;
+}
+
+.section-header-audit {
+  align-items: flex-end;
+}
+
+.audit-subtitle {
+  margin: 0;
+  color: #bfb7aa;
+}
+
+.audit-panel {
+  margin-top: 18px;
+  padding: 10px 0;
+  background: rgba(43, 41, 37, 0.94);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.audit-list {
+  display: grid;
+}
+
+.audit-item {
+  padding: 18px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.audit-item:last-child {
+  border-bottom: 0;
+}
+
+.audit-item-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.audit-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 108px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.audit-pill-assign,
+.audit-pill-reserve {
+  background: rgba(27, 126, 102, 0.18);
+  color: #8fd4bc;
+}
+
+.audit-pill-edit {
+  background: rgba(51, 104, 189, 0.18);
+  color: #9ec2ff;
+}
+
+.audit-pill-decommission {
+  background: rgba(170, 104, 104, 0.18);
+  color: #eab7b7;
+}
+
+.audit-meta,
+.audit-time {
+  margin: 0;
+  color: #bcb4a8;
+  font-size: 0.94rem;
+}
+
+.audit-message {
+  margin: 12px 0 8px;
+  color: #f0ebe0;
+  font-size: 1.01rem;
+}
+
 .row-actions {
   display: flex;
   gap: 8px;

@@ -7,8 +7,35 @@ from pathlib import Path
 from threading import Lock
 
 
-DEFAULT_POOLS = {
-    "2-byte": {
+DEFAULT_STORE = {
+    "auditLog": [
+        {
+            "timestamp": "2024-07-10T09:30:00Z",
+            "action": "reserve",
+            "pool": "2-byte",
+            "asn": "AS64526",
+            "actor": "Planning",
+            "message": "Reserved ASN for CNX customer expansion hold.",
+        },
+        {
+            "timestamp": "2024-06-15T11:10:00Z",
+            "action": "assign",
+            "pool": "2-byte",
+            "asn": "AS64521",
+            "actor": "IPCORE-ENG",
+            "message": "Assigned ASN for BKK customer edge handoff.",
+        },
+        {
+            "timestamp": "2024-06-14T08:20:00Z",
+            "action": "assign",
+            "pool": "4-byte",
+            "asn": "AS4200000017",
+            "actor": "MPLS-OPS",
+            "message": "Assigned 4-byte ASN for HKT service edge.",
+        },
+    ],
+    "pools": {
+        "2-byte": {
         "rangeLabel": "2-byte pool: 64512-65534",
         "minAsn": 64512,
         "maxAsn": 65534,
@@ -113,8 +140,8 @@ DEFAULT_POOLS = {
                 "description": "Legacy node decommissioned",
             },
         ],
-    },
-    "4-byte": {
+        },
+        "4-byte": {
         "rangeLabel": "4-byte pool: 4200000000-4294967294",
         "minAsn": 4200000000,
         "maxAsn": 4294967294,
@@ -164,6 +191,7 @@ DEFAULT_POOLS = {
                 "description": "Service edge handoff",
             },
         ],
+        },
     },
 }
 
@@ -175,13 +203,31 @@ STORE_LOCK = Lock()
 def ensure_store() -> None:
     DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
     if not DATA_FILE.exists():
-        DATA_FILE.write_text(json.dumps(DEFAULT_POOLS, indent=2), encoding="utf-8")
+        DATA_FILE.write_text(json.dumps(DEFAULT_STORE, indent=2), encoding="utf-8")
+
+
+def normalize_store(store: dict) -> dict:
+    if "pools" in store:
+        normalized = {
+            "auditLog": store.get("auditLog", []),
+            "pools": store["pools"],
+        }
+    else:
+        normalized = {
+            "auditLog": [],
+            "pools": store,
+        }
+    return normalized
 
 
 def load_store() -> dict:
     ensure_store()
     with STORE_LOCK:
-        return json.loads(DATA_FILE.read_text(encoding="utf-8"))
+        raw_store = json.loads(DATA_FILE.read_text(encoding="utf-8"))
+    normalized = normalize_store(raw_store)
+    if normalized != raw_store:
+        save_store(normalized)
+    return normalized
 
 
 def save_store(store: dict) -> dict:
@@ -192,4 +238,4 @@ def save_store(store: dict) -> dict:
 
 
 def reset_store() -> dict:
-    return save_store(deepcopy(DEFAULT_POOLS))
+    return save_store(deepcopy(DEFAULT_STORE))
