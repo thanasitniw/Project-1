@@ -1,198 +1,389 @@
 <!doctype html>
-<html lang="en">
+<html lang="th">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Private ASN Manager</title>
+    <title>Private ASN Manager — IP Core Network</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
     <script type="module" src="/src/main.js"></script>
   </head>
   <body>
-    <main class="page-shell">
-      <header class="page-header">
-        <div class="headline-block">
-          <p class="eyebrow">IPCORE NETWORK</p>
-          <h1>Private ASN Manager</h1>
-          <p class="subtitle">IP Core Network <span class="separator">—</span> <span id="pool-label">2-byte pool: 64512-65534</span></p>
-          <div class="pool-switch-row">
-            <span class="pool-switch-label">Pool view</span>
-            <div class="segmented-control">
-              <button class="segment is-active" data-pool="2-byte">2-byte</button>
-              <button class="segment" data-pool="4-byte">4-byte</button>
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="sidebar-logo">
+          <div class="logo-mark">&#9670; IPCORE</div>
+          <div class="logo-name">ASN Manager</div>
+          <div class="logo-sub">Private BGP Registry</div>
+        </div>
+
+        <nav class="nav">
+          <button class="nav-item active" type="button" data-page-target="dashboard">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+              <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+              <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+              <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+            </svg>
+            Dashboard
+          </button>
+
+          <button class="nav-item" type="button" data-page-target="assignments">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"></path>
+              <path d="M9 5a2 2 0 002 2h2a2 2 0 002-2"></path>
+              <path d="M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            </svg>
+            ASN Assignments
+            <span class="nav-badge" id="nav-count">0</span>
+          </button>
+
+          <button class="nav-item" type="button" data-page-target="pools">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M12 6v6l4 2"></path>
+            </svg>
+            Pool Management
+          </button>
+
+          <button class="nav-item" type="button" data-page-target="audit">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path d="M12 8v4l3 3"></path>
+              <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Audit Log
+          </button>
+
+          <div class="nav-section">Tools</div>
+
+          <button class="nav-item" id="export-csv-button" type="button">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1"></path>
+              <path d="M16 12l-4 4-4-4"></path>
+              <path d="M12 16V4"></path>
+            </svg>
+            Export CSV
+          </button>
+        </nav>
+
+        <div class="sidebar-bottom">
+          <div class="user-row">
+            <div class="avatar">NE</div>
+            <div>
+              <div class="user-name">Network Engineer</div>
+              <div class="user-role" id="sidebar-status">Loading backend...</div>
             </div>
           </div>
         </div>
+      </aside>
 
-        <div class="header-actions">
-          <button class="export-button" id="export-csv-button" type="button">Export CSV</button>
-          <button class="assign-button" id="open-assign-modal" type="button">+ Assign new ASN ↗</button>
-        </div>
-      </header>
-
-      <section class="summary-grid" id="stats-grid"></section>
-
-      <section class="assignment-section">
-        <div class="section-header">
-          <h2>ASN assignments</h2>
-
-          <div class="filters-row">
-            <label class="search-box">
-              <span class="visually-hidden">Search</span>
-              <input id="search-input" type="search" placeholder="Search site, hostname" />
-            </label>
-
-            <select class="select-box" id="status-filter">
-              <option value="all">All status</option>
-              <option value="Assigned">Assigned</option>
-              <option value="Reserved">Reserved</option>
-              <option value="Decom">Decom</option>
-            </select>
-
-            <select class="select-box" id="type-filter">
-              <option value="all">All type</option>
-              <option value="iBGP">iBGP</option>
-              <option value="eBGP">eBGP</option>
-              <option value="MPLS">MPLS</option>
-            </select>
+      <main class="main">
+        <div class="topbar">
+          <div id="page-breadcrumb" class="topbar-breadcrumb">
+            <span>IPCORE</span> / <span>Dashboard</span>
+          </div>
+          <div class="topbar-right">
+            <button class="btn btn-primary" id="open-assign-modal" type="button">
+              <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                <path d="M12 4v16"></path>
+                <path d="M20 12H4"></path>
+              </svg>
+              Assign New ASN
+            </button>
           </div>
         </div>
 
-        <div class="table-panel">
-          <table>
-            <thead>
-              <tr>
-                <th>ASN</th>
-                <th>Site / PoP</th>
-                <th>Region</th>
-                <th>Router Hostname</th>
-                <th>Type</th>
-                <th>Status</th>
-                <th>Assigned</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="asn-table-body"></tbody>
-          </table>
+        <div class="content">
+          <section class="page active" id="page-dashboard">
+            <div class="stats-grid" id="dashboard-stats-grid"></div>
 
-          <section class="utilization-panel">
-            <div class="utilization-header">
-              <h2>Pool utilization</h2>
-              <p id="utilization-text">0 / 0 used (0%)</p>
+            <div class="pool-section">
+              <div class="pool-header">
+                <div class="pool-title">Pool utilization</div>
+                <span class="badge-gray" id="pool-summary-badge">2 pools active</span>
+              </div>
+              <div class="pool-bars" id="dashboard-pool-bars"></div>
             </div>
-            <div class="utilization-bar">
-              <span class="utilization-fill" id="utilization-fill"></span>
+
+            <div class="dashboard-grid">
+              <div class="table-wrap">
+                <div class="panel-title">Recent Assignments</div>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>ASN</th>
+                      <th>Site</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recent-table-body"></tbody>
+                </table>
+              </div>
+
+              <div class="table-wrap">
+                <div class="panel-title">By Region</div>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Region</th>
+                      <th>ASNs</th>
+                      <th>Active</th>
+                    </tr>
+                  </thead>
+                  <tbody id="region-table-body"></tbody>
+                </table>
+              </div>
             </div>
           </section>
-        </div>
-      </section>
 
-      <section class="footer-note">
-        <p id="status-text">Checking backend...</p>
-      </section>
-
-      <section class="audit-section">
-        <div class="section-header section-header-audit">
-          <h2>Audit log</h2>
-          <p class="audit-subtitle">Recent assignment actions with actor and timestamp.</p>
-        </div>
-        <div class="audit-panel">
-          <div class="audit-list" id="audit-log-list"></div>
-        </div>
-      </section>
-    </main>
-
-    <div class="modal-backdrop is-hidden" id="assign-modal-backdrop">
-      <section
-        class="assign-modal"
-        id="assign-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="assign-modal-title"
-      >
-        <div class="modal-header">
-          <div>
-            <p class="modal-kicker">Assignment workflow</p>
-            <h2 id="assign-modal-title">Assign new ASN</h2>
-            <p class="modal-copy">Create a new ASN assignment with auto-pick or a manual ASN number.</p>
-          </div>
-          <button class="modal-close" id="close-assign-modal" type="button" aria-label="Close modal">×</button>
-        </div>
-
-        <form class="assign-form" id="assign-form">
-          <div class="edit-banner is-hidden" id="edit-banner">
-            Editing existing assignment <strong id="editing-assignment-label">ASN</strong>
-          </div>
-          <div class="form-grid form-grid-wide">
-            <label class="field-group">
-              <span>Assignment mode</span>
-              <div class="segmented-control segmented-control-form">
-                <button class="segment is-active" id="mode-auto" type="button" data-assign-mode="auto">Auto assign</button>
-                <button class="segment" id="mode-manual" type="button" data-assign-mode="manual">Manual ASN</button>
+          <section class="page" id="page-assignments">
+            <div class="toolbar-row">
+              <div class="search-wrap">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="M21 21l-4.35-4.35"></path>
+                </svg>
+                <input class="search-input" id="search-input" type="text" placeholder="Search ASN, site, hostname..." />
               </div>
-            </label>
 
-            <label class="field-group">
-              <span>ASN number</span>
-              <input id="asn-number-input" name="asnNumber" type="number" placeholder="Auto-selected from pool" disabled />
-            </label>
-          </div>
+              <select class="filter-select" id="status-filter">
+                <option value="all">All Status</option>
+                <option value="Assigned">Assigned</option>
+                <option value="Reserved">Reserved</option>
+                <option value="Decom">Decommissioned</option>
+              </select>
 
-          <div class="form-grid">
-            <label class="field-group">
-              <span>Site / PoP</span>
-              <input id="site-input" name="site" type="text" placeholder="BKK-POP-03" required />
-            </label>
-
-            <label class="field-group">
-              <span>Region</span>
-              <input id="region-input" name="region" type="text" placeholder="BKK" required />
-            </label>
-          </div>
-
-          <div class="form-grid">
-            <label class="field-group">
-              <span>Router hostname</span>
-              <input id="router-input" name="router" type="text" placeholder="bkk-pe03.ipcore.net" required />
-            </label>
-
-            <label class="field-group">
-              <span>Assignment type</span>
-              <select id="assignment-type-input" name="type">
+              <select class="filter-select" id="type-filter">
+                <option value="all">All Type</option>
                 <option value="iBGP">iBGP</option>
                 <option value="eBGP">eBGP</option>
                 <option value="MPLS">MPLS</option>
               </select>
-            </label>
+
+              <select class="filter-select" id="region-filter">
+                <option value="all">All Region</option>
+              </select>
+
+              <div class="tab-group">
+                <button class="tab-btn active" type="button" data-pool="2-byte">2-byte</button>
+                <button class="tab-btn" type="button" data-pool="4-byte">4-byte</button>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th class="sortable" data-sort="asn">ASN &#8693;</th>
+                    <th class="sortable" data-sort="site">Site / PoP</th>
+                    <th>Region</th>
+                    <th>Router Hostname</th>
+                    <th>BGP Type</th>
+                    <th>Status</th>
+                    <th class="sortable" data-sort="assigned">Assigned Date</th>
+                    <th>By</th>
+                    <th style="width: 180px;"></th>
+                  </tr>
+                </thead>
+                <tbody id="asn-table-body"></tbody>
+              </table>
+              <div class="table-footer" id="table-footer">0 records</div>
+            </div>
+          </section>
+
+          <section class="page" id="page-pools">
+            <div class="pool-card-grid" id="pool-card-grid"></div>
+            <div class="table-wrap reserved-ranges-panel">
+              <div class="panel-title">Reserved Ranges</div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Range Start</th>
+                    <th>Range End</th>
+                    <th>Purpose</th>
+                    <th>Pool</th>
+                  </tr>
+                </thead>
+                <tbody id="reserved-ranges-body"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="page" id="page-audit">
+            <div class="table-wrap">
+              <div class="panel-title">Activity Log</div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Action</th>
+                    <th>ASN</th>
+                    <th>Pool</th>
+                    <th>User</th>
+                    <th>Detail</th>
+                  </tr>
+                </thead>
+                <tbody id="audit-table-body"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <div class="modal-overlay" id="modal-overlay">
+      <div class="modal">
+        <div class="modal-header">
+          <div>
+            <div class="modal-title" id="modal-title">Assign New Private ASN</div>
+            <div class="modal-subtitle" id="modal-subtitle">Create a new assignment in the selected ASN pool.</div>
+          </div>
+          <button class="modal-close" id="close-assign-modal" type="button">&#215;</button>
+        </div>
+
+        <form class="modal-body" id="assign-form">
+          <div class="form-group">
+            <label class="form-label">Assignment Mode</label>
+            <div class="tab-group tab-group-inline">
+              <button class="tab-btn active" id="mode-auto" type="button" data-assign-mode="auto">Auto</button>
+              <button class="tab-btn" id="mode-manual" type="button" data-assign-mode="manual">Manual</button>
+            </div>
           </div>
 
-          <div class="form-grid">
-            <label class="field-group">
-              <span>Status</span>
-              <select id="assignment-status-input" name="status">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">ASN</label>
+              <div class="auto-asn-box">
+                <div>
+                  <div class="auto-asn-value" id="next-asn-display">—</div>
+                  <div class="auto-asn-label">Next available from selected pool</div>
+                </div>
+                <span class="badge-blue" id="assign-mode-badge">Auto</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Manual ASN</label>
+              <input class="form-input" id="asn-number-input" type="number" placeholder="Enter ASN number" disabled />
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Site / PoP <span>*</span></label>
+              <input class="form-input" id="site-input" type="text" placeholder="e.g. BKK-POP-03" required />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Region <span>*</span></label>
+              <select class="form-select" id="region-input" required></select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Router Hostname</label>
+              <input class="form-input" id="router-input" type="text" placeholder="e.g. bkk-pe03.ipcore.net" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">BGP Type <span>*</span></label>
+              <select class="form-select" id="assignment-type-input">
+                <option value="iBGP">iBGP</option>
+                <option value="eBGP">eBGP</option>
+                <option value="MPLS">MPLS</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Status <span>*</span></label>
+              <select class="form-select" id="assignment-status-input">
                 <option value="Assigned">Assigned</option>
                 <option value="Reserved">Reserved</option>
-                <option value="Decom">Decom</option>
+                <option value="Decom">Decommissioned</option>
               </select>
-            </label>
+            </div>
 
-            <label class="field-group">
-              <span>Assigned by</span>
-              <input id="assigned-by-input" name="assignedBy" type="text" placeholder="Network Engineer" required />
-            </label>
+            <div class="form-group">
+              <label class="form-label">Assigned By <span>*</span></label>
+              <input class="form-input" id="assigned-by-input" type="text" placeholder="Network Engineer" required />
+            </div>
           </div>
 
-          <label class="field-group">
-            <span>Description / purpose</span>
-            <textarea id="description-input" name="description" rows="3" placeholder="iBGP for PE expansion, customer edge handoff, MPLS service edge, etc."></textarea>
-          </label>
+          <div class="form-group">
+            <label class="form-label">Description / Purpose</label>
+            <textarea class="form-textarea" id="description-input" placeholder="e.g. Core PE router expansion, CE handoff, MPLS service edge"></textarea>
+          </div>
 
-          <p class="form-feedback" id="form-feedback">Next available ASN will be suggested automatically from the active pool.</p>
+          <p class="form-feedback" id="form-feedback">Choose auto assign or enter an ASN manually within the selected pool.</p>
 
-          <div class="modal-actions">
-            <button class="secondary-button" id="cancel-assign-modal" type="button">Cancel</button>
-            <button class="primary-submit-button" type="submit">Save assignment</button>
+          <div class="modal-footer">
+            <button class="btn" id="cancel-assign-modal" type="button">Cancel</button>
+            <button class="btn btn-primary" id="modal-submit-btn" type="submit">Assign ASN</button>
           </div>
         </form>
-      </section>
+      </div>
     </div>
+
+    <div class="modal-overlay" id="confirm-overlay">
+      <div class="confirm-dialog">
+        <div class="confirm-title" id="confirm-title">Confirm Action</div>
+        <div class="confirm-body" id="confirm-body">Are you sure?</div>
+        <div class="confirm-actions">
+          <button class="btn" id="confirm-cancel-button" type="button">Cancel</button>
+          <button class="btn btn-danger" id="confirm-accept-button" type="button">Confirm</button>
+        </div>
+      </div>
+    </div>
+
+    <aside class="detail-panel" id="detail-panel">
+      <div class="detail-header">
+        <div>
+          <div class="detail-asn" id="detail-asn">—</div>
+          <div class="detail-site" id="detail-site">—</div>
+        </div>
+        <button class="modal-close" id="close-detail-button" type="button">&#215;</button>
+      </div>
+
+      <div class="detail-body">
+        <div class="detail-section">
+          <div class="detail-section-title">Assignment Info</div>
+          <div class="detail-row"><span class="detail-key">Status</span><span class="detail-val" id="detail-status">—</span></div>
+          <div class="detail-row"><span class="detail-key">BGP Type</span><span class="detail-val" id="detail-type">—</span></div>
+          <div class="detail-row"><span class="detail-key">Region</span><span class="detail-val" id="detail-region">—</span></div>
+          <div class="detail-row"><span class="detail-key">Router Hostname</span><span class="detail-val" id="detail-router">—</span></div>
+          <div class="detail-row"><span class="detail-key">Pool</span><span class="detail-val" id="detail-pool">—</span></div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">Metadata</div>
+          <div class="detail-row"><span class="detail-key">Assigned Date</span><span class="detail-val" id="detail-date">—</span></div>
+          <div class="detail-row"><span class="detail-key">Assigned By</span><span class="detail-val" id="detail-by">—</span></div>
+          <div class="detail-row"><span class="detail-key">Description</span><span class="detail-val detail-description" id="detail-description">—</span></div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">Audit trail</div>
+          <div id="detail-audit-list"></div>
+        </div>
+
+        <div class="detail-actions">
+          <button class="btn" id="detail-edit-button" type="button">Edit</button>
+          <button class="btn" id="detail-reactivate-button" type="button">Reactivate</button>
+          <button class="btn btn-danger" id="detail-decom-button" type="button">Decommission</button>
+          <button class="btn btn-danger" id="detail-delete-button" type="button">Delete</button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="toast-wrap" id="toast-wrap"></div>
   </body>
 </html>
